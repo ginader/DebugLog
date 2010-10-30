@@ -1,0 +1,44 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN"
+   "http://www.w3.org/TR/html4/strict.dtd">
+
+<html lang="en">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+	<title>test</title>
+	<meta name="generator" content="TextMate http://macromates.com/">
+	<meta name="author" content="Dirk Ginader">
+	
+	<!-- Date: 2010-10-29 -->
+</head>
+<body>
+    <button id="bla">bla bla</button>
+    <button id="enable">enable and save</button>   
+    <button id="disable">disable and save</button>   
+    <script src="log.js" type="text/javascript" charset="utf-8"></script>
+    <script type="text/javascript" charset="utf-8">
+        function test(){
+            DebugLog.log('test1');
+            DebugLog.log('test2','window','onclick');
+            DebugLog.log({
+                bla : 'bla',
+                foo : 1,
+                bar : false,
+                test : [1,2,3],
+                a : {bla:[4,5,6]},
+                huh : document.getElementById('bla')
+            });
+        }
+
+        test();
+        document.getElementById('bla').onclick = function(){
+            test();
+        }
+        document.getElementById('enable').onclick = function(){
+            DebugLog.enable(true,true);
+        }
+        document.getElementById('disable').onclick = function(){
+            DebugLog.enable(false,true);
+        }
+    </script>
+</body>
+</html>
