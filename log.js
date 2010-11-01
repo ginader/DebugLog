@@ -9,10 +9,11 @@
  * http://www.opensource.org/licenses/mit-license.php
  * http://www.gnu.org/licenses/gpl.html
  *
- * Version: 1.0
+ * Version: 1.1
  *
- * Ideas:
- * * filter to only log calls of whitelisted classes and/or their specific methods for noise reduction
+ * History:
+ * * new features 'blacklist' and 'whitelist' used to hide logs of blacklisted or 
+     show only logs of whitelisted classes and/or their specific methods for noise reduction
  * * 
  */
 
@@ -22,7 +23,10 @@ DebugLog = {
     initialized : false,
     is : {},
     can : {},
-    filter : [],
+    usewhitelist : false,
+    whitelist : [],
+    useblacklist : false,
+    blacklist : [],
     conf : {},
     showNodeProperties : ['id','class','href','type','value'],
     
@@ -50,18 +54,42 @@ DebugLog = {
         this.log(this.serialize(this.is));
     },
     
-    log : function(o){
+    log : function(o,objectname,methodname){
         if(!this.initialized){this.init();}
         if(!this.on){
             if(this.usecookie){
-                this.conf = eval(this.readConf());
+                this.conf = eval('(' + this.readConf() + ')');
                 if(!!this.conf){
-                    this.on = true;
+                    this.on = true; // we have a conf so it's on
+                    this.applyConf(this.conf);
+                    if(!this.on){ // 'on' might also have been overwritten in conf
+                        return                        
+                    }
                 }else{
                     return
                 }
             }else{
                 return;
+            }
+        }
+        if(this.usewhitelist){
+            if(this.islisted('white',objectname)){
+                //console.log('pass as "'+objectname+'" is in whitelist');
+            }else if(this.usewhitelist && objectname && methodname){
+                if(!this.islisted('white',objectname+':'+methodname)){
+                    //console.log('block as "'+objectname+':'+methodname+'" is not in whitelist');
+                    return;                    
+                }
+                //console.log('pass as "'+objectname+':'+methodname+'" is in whitelist');
+            }else{
+                //console.log('block as "'+objectname+'" is not in whitelist');
+                return;
+            }
+        }
+        else if(this.useblacklist){
+            if( this.islisted('black',objectname) || this.islisted('black',objectname+':'+methodname) ){
+                //console.log('block as "'+objectname+'" or "'+objectname+':'+methodname+'" is in blacklist');
+                return
             }
         }
         if(this.can.renderObjects){
@@ -75,17 +103,32 @@ DebugLog = {
         }
     },
     
+    islisted : function(list,str){
+        if (new RegExp('^(' + this[list+'list'].join('|') + ')$').test(str)){
+            return true;
+        }
+        return false;
+    },
+    
     enable : function(conf,persistant){
         this.on = !!conf;
+        this.conf = conf;
+        this.applyConf(this.conf);
         if(persistant){
-            this.log('saving');
-            this.log(conf);
             this.saveConf(conf);
         }
     },
     
+    applyConf : function(conf){
+        for(var prop in conf){
+            if(conf.hasOwnProperty(prop)){
+                this[prop] = conf[prop];
+            }
+        }
+    },
+    
     getNodeMarkup : function(o){
-        // only showing whitelisted properties
+        // only showing whitelisted properties. Extent "showNodeProperties" if you need more
         var output='domEl{<';
         output+=o.nodeName.toLowerCase();
         for(var i=0,l=this.showNodeProperties.length;i<l;i++){
@@ -138,11 +181,11 @@ DebugLog = {
     },
     
     saveConf : function(conf) {
-        document.cookie = "DebugLog="+this.serialize(conf)+"; path=/";
+        document.cookie = "DebugLogConf="+this.serialize(conf)+"; path=/";
     },
     
     readConf : function() {
-        var nameEQ = "DebugLog=";
+        var nameEQ = "DebugLogConf=";
         var ca = document.cookie.split(';');
         for(var i=0;i < ca.length;i++) {
             var c = ca[i];
@@ -153,6 +196,6 @@ DebugLog = {
     },
     
     deleteConf : function(name) {
-        saveConf("");
+        this.saveConf();
     }
 }

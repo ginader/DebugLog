@@ -11,26 +11,34 @@
 	<!-- Date: 2010-10-29 -->
 </head>
 <body>
-    <button id="bla">bla bla</button>
+    <button id="test">run test</button>
     <button id="enable">enable and save</button>   
-    <button id="disable">disable and save</button>   
+    <button id="disable">disable and save</button> 
+    <button id="blacklist">blacklist logs from 'window' and save</button>  
+    <button id="whitelist">whitelist logs from 'bla:foo' and 'window:onclick' and save</button>  
+    <button id="whiteblacklist">blacklist logs from 'window' and whitelist logs from 'bla:foo' and 'window:onclick' and save</button>  
+    <button id="clear">clear conf</button> 
+    
     <script src="log.js" type="text/javascript" charset="utf-8"></script>
     <script type="text/javascript" charset="utf-8">
         function test(){
             DebugLog.log('test1');
-            DebugLog.log('test2','window','onclick');
+            DebugLog.log('test2','window');
+            DebugLog.log('test3','window','onclick');
+            DebugLog.log('test4','bla');
+            DebugLog.log('test5','bla','foo');
             DebugLog.log({
+                test : 6,
                 bla : 'bla',
-                foo : 1,
                 bar : false,
-                test : [1,2,3],
+                foo : [1,2,3],
                 a : {bla:[4,5,6]},
                 huh : document.getElementById('bla')
             });
         }
 
         test();
-        document.getElementById('bla').onclick = function(){
+        document.getElementById('test').onclick = function(){
             test();
         }
         document.getElementById('enable').onclick = function(){
@@ -39,6 +47,19 @@
         document.getElementById('disable').onclick = function(){
             DebugLog.enable(false,true);
         }
+        document.getElementById('blacklist').onclick = function(){
+            DebugLog.enable({useblacklist:1,blacklist:['window']},1);
+        }
+        document.getElementById('whitelist').onclick = function(){
+            DebugLog.enable({usewhitelist:1,whitelist:['bla:foo','window:onclick'],on:1},1)
+        }
+        document.getElementById('whiteblacklist').onclick = function(){
+            DebugLog.enable({useblacklist:1,blacklist:['window'],usewhitelist:1,whitelist:['bla:foo','window:onclick'],on:1},1)
+        }
+        document.getElementById('clear').onclick = function(){
+            DebugLog.deleteConf();
+        }
+        
     </script>
 </body>
 </html>
