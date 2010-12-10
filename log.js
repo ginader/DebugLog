@@ -168,7 +168,7 @@ DebugLog = {
                 str = '{';
                 var key;
                 for (key in o) {
-                    if(o.hasOwnProperty('key')){
+                    if(o.hasOwnProperty(key)){
                         str += key + ':' + this.serialize(o[key]) + ',';
                     }
                 }
