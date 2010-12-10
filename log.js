@@ -9,7 +9,7 @@
  * http://www.opensource.org/licenses/mit-license.php
  * http://www.gnu.org/licenses/gpl.html
  *
- * Version: 1.1
+ * Version: 1.2
  *
  * History:
  * * new features 'blacklist' and 'whitelist' used to hide logs of blacklisted or 
@@ -18,7 +18,7 @@
  */
 
 DebugLog = {
-    on : false,
+    on : true,
     usecookie : true,
     initialized : false,
     is : {},
@@ -48,7 +48,7 @@ DebugLog = {
             chrome      : !!(window.chrome),
             safari      : !!(navigator.vendor && navigator.vendor.indexOf('Apple')!=-1),
             opera       : !!(window.opera && window.opera.postError)
-        }
+        };
         
         this.can.renderObjects = (this.is.firebug || this.is.chrome || this.is.safari);
         this.log(this.serialize(this.is));
@@ -63,10 +63,10 @@ DebugLog = {
                     this.on = true; // we have a conf so it's on
                     this.applyConf(this.conf);
                     if(!this.on){ // 'on' might also have been overwritten in conf
-                        return                        
+                        return;
                     }
                 }else{
-                    return
+                    return;
                 }
             }else{
                 return;
@@ -89,7 +89,7 @@ DebugLog = {
         else if(this.useblacklist){
             if( this.islisted('black',objectname) || this.islisted('black',objectname+':'+methodname) ){
                 //console.log('block as "'+objectname+'" or "'+objectname+':'+methodname+'" is in blacklist');
-                return
+                return;
             }
         }
         if(this.can.renderObjects){
@@ -154,10 +154,8 @@ DebugLog = {
           case 'boolean':
           case 'function':
              return o;
-             break;
           case 'string':
              return '\'' + o + '\'';
-             break;
           case 'object':
              var str;
              if (o.constructor === Array || typeof o.callee !== 'undefined'){
@@ -169,14 +167,16 @@ DebugLog = {
              else{
                 str = '{';
                 var key;
-                for (key in o) { str += key + ':' + this.serialize(o[key]) + ','; }
+                for (key in o) {
+                    if(o.hasOwnProperty('key')){
+                        str += key + ':' + this.serialize(o[key]) + ',';
+                    }
+                }
                 str = str.replace(/\,$/, '') + '}';
              }
              return str;
-             break;
           default:
              return 'UNKNOWN';
-             break;
        }
     },
     
@@ -189,8 +189,8 @@ DebugLog = {
         var ca = document.cookie.split(';');
         for(var i=0;i < ca.length;i++) {
             var c = ca[i];
-            while (c.charAt(0)==' ') c = c.substring(1,c.length);
-            if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length,c.length);
+            while (c.charAt(0)==' ') {c = c.substring(1,c.length);}
+            if (c.indexOf(nameEQ) === 0) {return c.substring(nameEQ.length,c.length);}
         }
         return null;
     },
@@ -198,4 +198,4 @@ DebugLog = {
     deleteConf : function(name) {
         this.saveConf();
     }
-}
+};
