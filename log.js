@@ -32,7 +32,7 @@ DebugLog = {
     
     init : function(){
         this.initialized = true;
-        this.can.log = (window.console && window.console.log);
+        this.can.log = ( (window.console && window.console.log) || (window.opera && window.opera.postError) );
         if(!this.can.log){
             //alert('No console found. No logging possible. Sorry Dude');
             this.on = false;
@@ -47,7 +47,8 @@ DebugLog = {
             ie          : !!(navigator.appVersion.indexOf('MSIE ')!=-1),
             chrome      : !!(window.chrome),
             safari      : !!(navigator.vendor && navigator.vendor.indexOf('Apple')!=-1),
-            opera       : !!(window.opera && window.opera.postError)
+            opera       : !!(window.opera && window.opera.postError),
+            operaNew    : !!(window.opera && window.console && window.console.log)
         };
         
         this.can.renderObjects = (this.is.firebug || this.is.chrome || this.is.safari);
@@ -94,6 +95,9 @@ DebugLog = {
         }
         if(this.can.renderObjects){
             console.log(o);
+        }
+        else if(this.is.operaNew){
+            console.log(this.serialize(o));
         }
         else if(this.is.opera){
             opera.postError(this.serialize(o));
